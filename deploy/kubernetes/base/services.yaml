@@ -1,0 +1,191 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels: &id001
+      app: backend
+  template:
+    metadata:
+      labels: *id001
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 210
+      containers:
+      - name: backend
+        image: 192.168.100.16:30501/ai-dream-backend:release
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 3000
+        env:
+        - name: RAILS_ENV
+          value: production
+        - name: SECRET_KEY_BASE
+          valueFrom:
+            secretKeyRef:
+              name: ai-dream-secrets
+              key: SECRET_KEY_BASE
+        - name: DATABASE_HOST
+          value: postgres
+        - name: DATABASE_PORT
+          value: "5432"
+        - name: DATABASE_NAME
+          value: ai_dream_production
+        - name: DATABASE_USER
+          value: ai_dream
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ai-dream-secrets
+              key: DATABASE_PASSWORD
+        - name: VOICE_SERVICE_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: ai-dream-secrets
+              key: VOICE_SERVICE_TOKEN
+        - name: VOICE_SERVICE_URL
+          value: http://voice:8000
+        - name: OLLAMA_URL
+          valueFrom:
+            configMapKeyRef:
+              name: ollama-config
+              key: OLLAMA_URL
+        - name: OLLAMA_MODEL
+          valueFrom:
+            configMapKeyRef:
+              name: ollama-config
+              key: OLLAMA_MODEL
+        - name: LLM_PROVIDER
+          valueFrom:
+            configMapKeyRef:
+              name: ollama-config
+              key: LLM_PROVIDER
+        - name: FIREWORKS_MODEL
+          valueFrom:
+            configMapKeyRef:
+              name: ollama-config
+              key: FIREWORKS_MODEL
+        - name: FIREWORKS_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: fireworks-api-key
+              key: FIREWORKS_API_KEY
+              optional: true
+        - name: FORCE_SSL
+          value: 'false'
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: '2'
+            memory: 2Gi
+        volumeMounts:
+        - name: data
+          mountPath: /app/storage
+        startupProbe:
+          httpGet:
+            path: /up
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 90
+        readinessProbe:
+          httpGet:
+            path: /up
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: app-storage
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  selector:
+    app: backend
+  ports:
+  - port: 3000
+    targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: voice
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels: &id001
+      app: voice
+  template:
+    metadata:
+      labels: *id001
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 210
+      containers:
+      - name: voice
+        image: 192.168.100.16:30501/ai-dream-voice:release
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8000
+        env:
+        - name: VOICE_DATA_DIR
+          value: /data
+        - name: VOICE_DEVICE
+          value: cpu
+        - name: VOICE_SERVICE_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: ai-dream-secrets
+              key: VOICE_SERVICE_TOKEN
+        resources:
+          requests:
+            cpu: '2'
+            memory: 4Gi
+          limits:
+            cpu: '4'
+            memory: 8Gi
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        startupProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 90
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: voice-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: voice
+spec:
+  selector:
+    app: voice
+  ports:
+  - port: 8000
+    targetPort: http

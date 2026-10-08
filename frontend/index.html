@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ai-dream</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="composer">
+        <div>
+          <p class="eyebrow">ai-dream</p>
+          <h1>Bring memories into motion.</h1>
+        </div>
+
+        <form id="memory-form" class="panel">
+          <label>
+            Person
+            <input name="person_name" required placeholder="Grandma Elena">
+          </label>
+
+          <div class="field-row">
+            <label>
+              Age then
+              <input name="person_age_at_memory" type="number" min="0" placeholder="42">
+            </label>
+
+            <label>
+              Date
+              <input name="memory_date" type="date">
+            </label>
+          </div>
+
+          <label>
+            Memory title
+            <input name="title" required placeholder="Summer kitchen song">
+          </label>
+
+          <label>
+            Memory
+            <textarea name="story" required rows="6" placeholder="What happened, where it was, what they sounded like, what mattered..."></textarea>
+          </label>
+
+          <label>
+            Photos
+            <input name="photos[]" type="file" accept="image/*" multiple>
+          </label>
+
+          <button type="submit">Save memory</button>
+        </form>
+      </section>
+
+      <section class="memory-column">
+        <div class="section-heading">
+          <h2>Memories</h2>
+          <button id="refresh-memories" type="button" class="icon-button" aria-label="Refresh memories">↻</button>
+        </div>
+        <div id="memory-list" class="memory-list"></div>
+      </section>
+
+      <section class="workspace">
+        <div id="empty-state" class="empty-state">
+          <h2>Select a memory</h2>
+          <p>Then create a video plan or talk with the remembered person at any age.</p>
+        </div>
+
+        <div id="memory-workspace" class="workspace-grid" hidden>
+          <article class="panel detail-panel">
+            <div>
+              <p class="eyebrow" id="active-person"></p>
+              <h2 id="active-title"></h2>
+              <p id="active-story"></p>
+            </div>
+            <div id="photo-strip" class="photo-strip"></div>
+          </article>
+
+          <article class="panel voice-panel">
+            <div>
+              <p class="eyebrow">Voice cloning</p>
+              <h2>Give this memory a voice</h2>
+              <p class="muted">Upload 10–30 seconds of clean speech. Your on-prem OpenVoice service creates the clone; local development falls back to a clearly labeled browser preview when that service is not configured.</p>
+              <div id="voice-status" class="voice-status">No voice profile yet.</div>
+            </div>
+
+            <form id="voice-form">
+              <label>
+                Voice recording
+                <input name="sample" type="file" accept="audio/*" required>
+              </label>
+              <label class="consent-row">
+                <input name="consent_confirmed" type="checkbox" value="true" required>
+                <span>I own this voice or have explicit permission to create and use its clone.</span>
+              </label>
+              <button type="submit">Create voice profile</button>
+            </form>
+
+            <div>
+              <form id="speech-form">
+                <label>
+                  Language
+                  <select name="language" id="speech-language">
+                    <option value="EN">English</option>
+                    <option value="ES">Spanish</option>
+                    <option value="FR">French</option>
+                    <option value="ZH">Chinese</option>
+                    <option value="JP">Japanese</option>
+                    <option value="KR">Korean</option>
+                  </select>
+                </label>
+                <label>
+                  Words to speak
+                  <textarea name="text" required maxlength="2500" rows="3" placeholder="Write something for the remembered person to say..."></textarea>
+                </label>
+                <button type="submit">Generate speech</button>
+              </form>
+              <div id="speech-list" class="speech-list"></div>
+            </div>
+          </article>
+
+          <article class="panel">
+            <h2>Conversation</h2>
+            <p class="muted">Replies are AI-generated imaginative reflections based on the saved story, not the person's actual words or memories.</p>
+            <div id="conversation-status" class="llm-status" role="status" aria-live="polite" hidden></div>
+            <div id="conversation-log" class="conversation-log"></div>
+            <form id="conversation-form" class="chat-form">
+              <label>
+                Age to speak as
+                <input name="age_years" type="number" min="0" placeholder="75">
+              </label>
+              <label>
+                Message
+                <textarea name="message" required rows="3" placeholder="Ask about the memory..."></textarea>
+              </label>
+              <button type="submit">Send</button>
+            </form>
+          </article>
+
+          <article class="panel">
+            <h2>Video</h2>
+            <div id="video-status" class="llm-status" role="status" aria-live="polite" hidden></div>
+            <form id="video-form">
+              <label>
+                Direction
+                <textarea name="prompt" rows="4" placeholder="A warm cinematic short with soft narration and realistic aging..."></textarea>
+              </label>
+              <button type="submit">Create video plan</button>
+            </form>
+            <div id="video-jobs" class="video-jobs"></div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

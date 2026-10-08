@@ -1,0 +1,5 @@
+2c2f1caa23c71185c73e4d04e604b4af375e60409a7c7e2e7579dd99cdf61f7e  ./ai-dream-backend-release.tar.gz
+ff41c8a7c0fdd3ab95de29df4d872db3545ca2ff2d80c8c4057e7067c5dcb410  ./ai-dream-frontend-release.tar.gz
+bef68b06cfb923d48d047be2c883b4f4c782d0eecbfdebf27b688557348eb177  ./ai-dream-ollama-release.tar.gz
+c7ddba5165b31de8a34fb4fc55044c6baf685438802078b4f8a2740ee06c8d8a  ./ai-dream-voice-release.tar.gz
+4da4eb1d8934815ea5ae7f126fd80ed0f8776bfcceba3b6d1a4605298ae7c7a1  ./postgres-16.tar.gz

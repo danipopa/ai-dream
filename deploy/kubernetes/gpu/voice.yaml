@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: voice
+spec:
+  template:
+    spec:
+      containers:
+        - name: voice
+          env:
+            - name: VOICE_DEVICE
+              value: cuda:0
+          resources:
+            limits:
+              nvidia.com/gpu: 1
